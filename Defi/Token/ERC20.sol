@@ -29,8 +29,8 @@ contract ERC20 is IERC20 {
     uint public totalSupply;
     mapping(address => uint) public balanceOf;
     mapping(address => mapping(address => uint)) public allowance;
-    string public name = name;
-    string public symbol = symbol;
+    string public name;
+    string public symbol;
     uint8 public decimals = 18;
 
     // the declaration shadows an existing declaration 沒有底線會出現warning
@@ -70,6 +70,10 @@ contract ERC20 is IERC20 {
         balanceOf[msg.sender] += amount;
         totalSupply += amount;
         emit Transfer(address(0), msg.sender, amount);
+    }
+
+    function test() public{
+        mint(0);
     }
 
     function burn(uint amount) external {
