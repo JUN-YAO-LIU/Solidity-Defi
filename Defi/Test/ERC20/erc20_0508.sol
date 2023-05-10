@@ -9,7 +9,7 @@ interface IERC20{
     // 2. function 怎麼寫 
     // 3. 不能public 
     // 4. interface 裡面不會有狀態。
-    // 5. are VIRTUAL BY DEFAULT
+    // 5. function is virtual
     // address a;
 
     // 確認花費的數量
