@@ -53,14 +53,6 @@ contract Staking{
     // 8 / 100
     uint rate = 8;
 
-    // struct取值、
-    // struct StakingData{
-    //     uint startAt;
-    //     uint endAt;
-    //     uint amount;
-    //     uint reward;
-    // }
-
     // 第幾個質押的，這個地址質押多少數量。
     mapping(address => uint[]) balanceOf;
 
