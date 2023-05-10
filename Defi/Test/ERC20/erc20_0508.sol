@@ -101,4 +101,8 @@ contract JimToken is ERC20{
 
     }
 
+    function getNow() external view returns(uint){
+        return block.timestamp ;
+    }
+
 }
