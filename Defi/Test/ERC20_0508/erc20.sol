@@ -5,11 +5,11 @@ pragma solidity ^0.8.19;
 
 // error:是小寫
 interface IERC20{
-    // 1. abstract virtual 放哪？Ans:abstract function 
+    // 1. abstract virtual 放哪？Ans:abstract function （還是錯）
     // 2. function 怎麼寫 
     // 3. 不能public 
     // 4. interface 裡面不會有狀態。
-    // 5. function is virtual
+    // 5. are VIRTUAL BY DEFAULT
     // address a;
 
     // 確認花費的數量
@@ -98,11 +98,6 @@ contract JimToken is ERC20{
     constructor(
         string memory _symbol,
         string memory _name) ERC20(_symbol,_name) {
-
-    }
-
-    function getNow() external view returns(uint){
-        return block.timestamp ;
     }
 
 }

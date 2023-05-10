@@ -9,10 +9,8 @@ interface IERC20 {
 
     function transfer(address recipient, uint amount) external returns (bool);
 
-    // owner : token擁有者
     function allowance(address owner, address spender) external view returns (uint);
 
-    // 批准spender 這個地址可以領走我的token
     function approve(address spender, uint amount) external returns (bool);
 
     function transferFrom(
@@ -41,6 +39,7 @@ contract ERC20 is IERC20 {
         symbol = _symbol;
     }
     
+
     function transfer(address recipient, uint amount) external returns (bool) {
         balanceOf[msg.sender] -= amount;
         balanceOf[recipient] += amount;
@@ -59,9 +58,6 @@ contract ERC20 is IERC20 {
         address recipient,
         uint amount
     ) external returns (bool) {
-        require(msg.sender == recipient,"error !");
-
-        // [要發送token的人][發給對象]
         allowance[sender][msg.sender] -= amount;
         balanceOf[sender] -= amount;
         balanceOf[recipient] += amount;
@@ -69,7 +65,7 @@ contract ERC20 is IERC20 {
         return true;
     }
 
-    // 1.給小孩用 2.自己contract，只能用internal
+    // 要給小孩用，只能用internal
     function mint(uint amount) internal {
         balanceOf[msg.sender] += amount;
         totalSupply += amount;
@@ -85,6 +81,7 @@ contract ERC20 is IERC20 {
         totalSupply -= amount;
         emit Transfer(msg.sender, address(0), amount);
     }
+
 }
 
 // https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v4.0.0/contracts/token/ERC20/ERC20.sol
