@@ -21,11 +21,11 @@ describe("SimpleSwap", function () {
     const factory = await ethers.getContractFactory("SimpleSwap");
 
     // interface test
-    const testInterface = await ethers.getContractFactory("ISwapRouter");
-    const _testInterface = await testInterface.deploy();
+    // const testInterface = await ethers.getContractFactory("ISwapRouter");
+    // const _testInterface = await testInterface.deploy();
 
     // 對應contract的輸入，Interface怎麼用
-    const factoryDeploy = await factory.deploy(_testInterface.address);
+    const factoryDeploy = await factory.deploy("0xE592427A0AEce92De3Edee1F18E0157C05861564");
     await factoryDeploy.deployed();
 
     const assert = await factoryDeploy.swapWETHForDAI(1); 
