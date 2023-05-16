@@ -24,7 +24,7 @@ describe("SimpleSwap", function () {
     // const testInterface = await ethers.getContractFactory("ISwapRouter");
     // const _testInterface = await testInterface.deploy();
 
-    // 對應contract的輸入，Interface怎麼用
+    // 因為合約創建要注入DI實例，那就直接把合約地址輸入。
     const factoryDeploy = await factory.deploy("0xE592427A0AEce92De3Edee1F18E0157C05861564");
     await factoryDeploy.deployed();
 
