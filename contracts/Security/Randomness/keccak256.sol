@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
+
 contract HashFunction {
+    
     function hash(
         string memory _text,
         uint _num,
