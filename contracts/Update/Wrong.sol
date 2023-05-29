@@ -278,6 +278,7 @@ contract ProxyAdmin {
 }
 
 library StorageSlot {
+    // library 使用限制，要注意下
     struct AddressSlot {
         address value;
     }
@@ -285,6 +286,8 @@ library StorageSlot {
     function getAddressSlot(
         bytes32 slot
     ) internal pure returns (AddressSlot storage r) {
+        // slot 是assembly才有的。
+        // 值是bytes32，要用keccak做
         assembly {
             r.slot := slot
         }
@@ -292,6 +295,7 @@ library StorageSlot {
 }
 
 contract TestSlot {
+    // 先創一個位置，等之後要寫入slot就可以用
     bytes32 public constant slot = keccak256("TEST_SLOT");
 
     function getSlot() external view returns (address) {
