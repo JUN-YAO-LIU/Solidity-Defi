@@ -21,6 +21,8 @@ change the owner.
 */
 
 contract Lib {
+    uint public test;
+    uint public a;
     uint public someNumber;
 
     function doSomething(uint _num) public {

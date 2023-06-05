@@ -10,6 +10,7 @@ F  D,E
 
 */
 
+
 contract A {
     function foo() public pure virtual returns (string memory) {
         return "A";

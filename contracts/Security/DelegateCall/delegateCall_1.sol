@@ -22,9 +22,11 @@ change the owner.
 
 contract Lib {
     address public owner;
+    string public test = "Jim";
 
     function pwn() public {
         owner = msg.sender;
+        test = "1";
     }
 }
 
