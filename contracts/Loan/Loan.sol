@@ -1,9 +1,7 @@
 // SPDX-License-Identifier:MIT
-pragma solidity 0.8.19;
+pragma solidity 0.8.20;
 
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-
-contract Loan is ERC20{
+contract Loan{
 
     address immutable owner;
 
@@ -22,26 +20,48 @@ contract Loan is ERC20{
     }
 
     // 怎麼紀錄交易對才好?
-    mapping (int => mapping (address => LoanData)) CreatedLoanLog;
+    mapping (int => LoanData) public CreatedLoanLogs;
+
+    mapping (int => address) public LoanMakerLogs;
+
+    int public txnNums = 0;
 
     modifier IsOwner {
         require(owner == msg.sender,"invalid");
         _;
     }
 
-    constructor(address _owner){
-        owner = _owner;
+    constructor(){
+        owner = msg.sender;
     }
 
     //新增想借貸的
     function createLoan(address _guarantyCoin,address _borrowCoin) public {
-        ERC20 guarantyCoin = IERC20(_guarantyCoin);
-        ERC20 borrowCoin = IERC20(_borrowCoin);
-        // mapping 怎麼新增
-        // CreatedLoanLog[][]
+        IERC20 guarantyCoin = IERC20(_guarantyCoin);
+        IERC20 borrowCoin = IERC20(_borrowCoin);
+
+        LoanData memory log;
+        
+        log =  LoanData({
+            guarantyCoin:_guarantyCoin,
+            borrowCoin:_borrowCoin,
+            guarantyAmount:10,
+            borrowAmount:10,
+            approve :false
+        });
+       
+       // mapping 怎麼新增 Ans 直接新增，nested也是
+       CreatedLoanLogs[txnNums] = log;
+       LoanMakerLogs[txnNums] = msg.sender;
+       txnNums++;
     }
 
-    function approveLoanData() {
+    function getLoanLog(int txnId) view public returns(address sender,LoanData memory data){
+        data = CreatedLoanLogs[txnId];
+        sender = LoanMakerLogs[txnId];
+    }
+
+    function approveLoanData() public IsOwner{
         
     }
 
