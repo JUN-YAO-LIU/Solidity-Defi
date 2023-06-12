@@ -3,6 +3,9 @@ pragma solidity 0.8.20;
 
 contract Loan{
 
+    // WETH "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
+    // USDT "0xdAC17F958D2ee523a2206206994597C13D831ec7"
+
     address immutable owner;
 
     // 10 min
@@ -54,6 +57,8 @@ contract Loan{
        CreatedLoanLogs[txnNums] = log;
        LoanMakerLogs[txnNums] = msg.sender;
        txnNums++;
+
+       // 轉入數量到這個合約，先鎖住
     }
 
     function getLoanLog(int txnId) view public returns(address sender,LoanData memory data){
@@ -71,19 +76,73 @@ contract Loan{
 }
 
 interface IERC20 {
-    event Transfer(address indexed from, address indexed to, uint256 value);
+    function totalSupply() external view returns (uint);
 
-    event Approval(address indexed owner, address indexed spender, uint256 value);
-   
-    function totalSupply() external view returns (uint256);
+    function balanceOf(address account) external view returns (uint);
 
-    function balanceOf(address account) external view returns (uint256);
+    function transfer(address recipient, uint amount) external returns (bool);
 
-    function transfer(address to, uint256 amount) external returns (bool);
+    function allowance(address owner, address spender) external view returns (uint);
 
-    function allowance(address owner, address spender) external view returns (uint256);
+    function approve(address spender, uint amount) external returns (bool);
 
-    function approve(address spender, uint256 amount) external returns (bool);
+    function transferFrom(
+        address sender,
+        address recipient,
+        uint amount
+    ) external returns (bool);
 
-    function transferFrom(address from, address to, uint256 amount) external returns (bool);
+    event Transfer(address indexed from, address indexed to, uint value);
+    event Approval(address indexed owner, address indexed spender, uint value);
+}
+
+// instance
+contract ERC20 is IERC20{
+    uint public totalSupply = 10 ** 18;
+    mapping(address => uint) public balanceOf;
+    mapping(address => mapping(address => uint)) public allowance;
+    string public name = "USD Jim";
+    string public symbol = "USDJ";
+    uint8 public decimals = 18;
+
+    constructor(){
+        balanceOf[msg.sender] = 100000;
+    }
+
+    function transfer(address recipient, uint amount) external returns (bool) {
+        balanceOf[msg.sender] -= amount;
+        balanceOf[recipient] += amount;
+        emit Transfer(msg.sender, recipient, amount);
+        return true;
+    }
+
+    function approve(address spender, uint amount) external returns (bool) {
+        allowance[msg.sender][spender] = amount;
+        emit Approval(msg.sender, spender, amount);
+        return true;
+    }
+
+    function transferFrom(
+        address sender,
+        address recipient,
+        uint amount
+    ) external returns (bool) {
+        allowance[sender][msg.sender] -= amount;
+        balanceOf[sender] -= amount;
+        balanceOf[recipient] += amount;
+        emit Transfer(sender, recipient, amount);
+        return true;
+    }
+
+    function mint(uint amount) external {
+        balanceOf[msg.sender] += amount;
+        totalSupply += amount;
+        emit Transfer(address(0), msg.sender, amount);
+    }
+
+    function burn(uint amount) external {
+        balanceOf[msg.sender] -= amount;
+        totalSupply -= amount;
+        emit Transfer(msg.sender, address(0), amount);
+    }
 }
