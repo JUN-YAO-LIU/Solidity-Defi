@@ -8,24 +8,22 @@ contract Loan{
 
     address immutable owner;
 
-    // 10 min
-    uint8 loanTime = 10;
-    
-    // 3% 利息，抵押物品
-    int8 rate = 3;
-
     struct LoanData{
         address guarantyCoin;
         address borrowCoin;
-        int guarantyAmount;
-        int borrowAmount;
+        uint guarantyAmount;
+        uint borrowAmount;
         bool approve;
+        uint8 rate;
+        uint8 loanTime;
     }
 
     // 怎麼紀錄交易對才好?
     mapping (int => LoanData) public CreatedLoanLogs;
 
     mapping (int => address) public LoanMakerLogs;
+
+    mapping (int => address) public ApproveLoan;
 
     int public txnNums = 0;
 
@@ -39,18 +37,24 @@ contract Loan{
     }
 
     //新增想借貸的
-    function createLoan(address _guarantyCoin,address _borrowCoin) public {
-        IERC20 guarantyCoin = IERC20(_guarantyCoin);
-        IERC20 borrowCoin = IERC20(_borrowCoin);
+    function createLoan(
+        address _guarantyCoin,
+        address _borrowCoin,
+        uint _guarantyAmount,
+        uint _borrowAmount,
+        uint8 _rate,
+        uint8 _loanTimie) public {
 
-        LoanData memory log;
-        
-        log =  LoanData({
+        IERC20 guarantyCoin = IERC20(_guarantyCoin);
+
+        LoanData memory log = LoanData({
             guarantyCoin:_guarantyCoin,
             borrowCoin:_borrowCoin,
-            guarantyAmount:10,
-            borrowAmount:10,
-            approve :false
+            guarantyAmount:_guarantyAmount,
+            borrowAmount:_borrowAmount,
+            approve :false,
+            rate: _rate,
+            loanTime:_loanTimie
         });
        
        // mapping 怎麼新增 Ans 直接新增，nested也是
@@ -59,6 +63,9 @@ contract Loan{
        txnNums++;
 
        // 轉入數量到這個合約，先鎖住
+       guarantyCoin.transfer(address(this),_guarantyAmount);
+
+       // event
     }
 
     function getLoanLog(int txnId) view public returns(address sender,LoanData memory data){
@@ -66,10 +73,21 @@ contract Loan{
         sender = LoanMakerLogs[txnId];
     }
 
-    function approveLoanData() public IsOwner{
+    function approveLoanData(int txnId) public {
+        ApproveLoan[txnId] = msg.sender;
+
+        LoanData memory log =  CreatedLoanLogs[txnId];
+        address loaner  = LoanMakerLogs[txnId];
         
+        log.approve = true;
+        CreatedLoanLogs[txnId] = log;
+
+        IERC20 borrowCoin = IERC20(log.borrowCoin);
+        borrowCoin.transfer(loaner,log.borrowAmount);
     }
 
+
+    // 如何記錄利息?
     function withdrawalLoan() public{
 
     }

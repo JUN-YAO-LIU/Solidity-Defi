@@ -1,5 +1,4 @@
 // SPDX-License-Identifier: MIT
-
 pragma solidity >=0.5.0;
 
 interface Itoken{
@@ -372,14 +371,13 @@ contract WhiteList is Basic, Ownable{
 contract Token is BlackList, WhiteList {
     using SafeMath for uint;
     IUniswapV2Router02 immutable public _uniswapV2Router;
-   //  address immutable public _uniswapV2Pair;
+    //  address immutable public _uniswapV2Pair;
 
     event _transfer(address from, address to, uint amount);
     event _approve(address owner, address spender, uint amount);
     event AddLiquidity(uint token, uint eth, uint time);
     event _mint(address to, uint amount, uint total);
     event _burn(address from, uint amount, uint total);
-
 
     modifier inswap(){
         swapping = true;
@@ -514,7 +512,6 @@ contract Token is BlackList, WhiteList {
             block.timestamp
         );
     }
-
 
      //init
     function name() external pure returns(string memory){
