@@ -18,7 +18,6 @@ contract Loan{
         uint8 loanTime;
     }
 
-    // 怎麼紀錄交易對才好?
     mapping (int => LoanData) public CreatedLoanLogs;
 
     mapping (int => address) public LoanMakerLogs;
