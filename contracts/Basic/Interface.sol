@@ -4,6 +4,12 @@ pragma solidity 0.8.20;
 // Uniswap為範例，基本上跟使用別人的方法一樣，是使用address建造實例。
 // 問題：不知道function一樣，但是interface 名稱不同可不可以？
 
+interface ITestUpdateState{
+    function mapState(address _a) external view returns(uint);
+
+    function setMapState(uint _u) external;
+}
+
 // Uniswap example
 interface UniswapV2Factory {
     function getPair(
@@ -40,6 +46,16 @@ interface IERC20 {
     event Approval(address indexed owner, address indexed spender, uint value);
 }
 
+contract TestUpdateState is ITestUpdateState{
+    mapping(address => uint) public mapState;
+    constructor (){
+        mapState[msg.sender] = 123;
+    }
+
+    function setMapState(uint _u) external {
+        mapState[msg.sender] = _u;
+    }
+}
 
 contract ERC20 is IERC20{
     uint public totalSupply = 10 ** 18;
@@ -116,6 +132,22 @@ contract TestApprove {
         token = ERC20(_a);
         uint t =  token.allowance(msg.sender,address(this));
         return t;
+    }
+
+    function testTransfer(address _a,address _b,uint _u) external{
+        token = ERC20(_a);
+        token.transfer(_b,_u);
+    }
+
+    function TestSetUpdateState(address _a,uint _u) external {
+        ITestUpdateState state = ITestUpdateState(_a);
+        state.setMapState(_u);
+    }
+
+    function abiSetState(address _a,uint _u) external {
+        _a.call(
+            abi.encodeWithSignature("setMapState(uint256)", _u)
+        );
     }
 }
 

@@ -28,6 +28,9 @@ contract Loan{
 
     mapping (int => address) public ApproveLoan;
 
+    // EOA的帳戶 -> 存入哪種幣 -> 有多少 (由外部更新資料)
+    mapping (address => mapping(address => uint)) public Account;
+
     int public txnNums = 0;
 
     modifier IsOwner {
@@ -44,6 +47,11 @@ contract Loan{
         guarantyCoin.approve(address(this),_guarantyAmount);
     }
 
+    // MetaMask連結到Dapp，透過Dapp傳送token到FreeLoan。
+    function RecordAccount(address _account,address _token,uint _amount) public {
+        Account[_account][_token] +=_amount;
+    }
+
     //新增想借貸的
     function createLoan(
         address _guarantyCoin,
@@ -54,6 +62,8 @@ contract Loan{
         uint8 _loanTimie) public {
 
         IERC20 guarantyCoin = IERC20(_guarantyCoin);
+
+        // 判斷有沒有金錢紀錄
 
         LoanData memory log = LoanData({
             guarantyCoin:_guarantyCoin,
@@ -203,7 +213,6 @@ contract ERC20 is IERC20{
         emit Transfer(address(0), account, amount);
     }
 }
-
 
 contract CustomeToken is ERC20{
    constructor(string memory symbol) ERC20(symbol) {
