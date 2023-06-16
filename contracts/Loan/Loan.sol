@@ -6,6 +6,10 @@ contract Loan{
     // WETH "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
     // USDT "0xdAC17F958D2ee523a2206206994597C13D831ec7"
 
+    // IERC20 public guarantyCoin;
+
+    // IERC20 public borrowCoin;
+
     address immutable owner;
 
     struct LoanData{
@@ -35,6 +39,11 @@ contract Loan{
         owner = msg.sender;
     }
 
+    function approveTrasfer(address _guarantyCoin,uint _guarantyAmount) external {
+        IERC20 guarantyCoin = IERC20(_guarantyCoin);
+        guarantyCoin.approve(address(this),_guarantyAmount);
+    }
+
     //新增想借貸的
     function createLoan(
         address _guarantyCoin,
@@ -61,8 +70,10 @@ contract Loan{
        LoanMakerLogs[txnNums] = msg.sender;
        txnNums++;
 
+
        // 轉入數量到這個合約，先鎖住
-       guarantyCoin.transfer(address(this),_guarantyAmount);
+       // guarantyCoin.approve(address(this),_guarantyAmount);
+       guarantyCoin.transferFrom(msg.sender,address(this),_guarantyAmount);
 
        // event
     }
@@ -85,10 +96,30 @@ contract Loan{
         borrowCoin.transfer(loaner,log.borrowAmount);
     }
 
+    // 回款
+    function refund(int txnId) public {
+        address borrower = LoanMakerLogs[txnId];
+        address lender = ApproveLoan[txnId];
+        LoanData memory log =  CreatedLoanLogs[txnId];
+        
+        // 時間沒有超
+        IERC20 borrowCoin = IERC20(log.borrowCoin);
+        IERC20 guarantyCoin = IERC20(log.guarantyCoin);
 
-    // 如何記錄利息?
-    function withdrawalLoan() public{
+        guarantyCoin.transfer(borrower,log.guarantyAmount * (1 - log.rate / 100));
 
+        guarantyCoin.transfer(lender,log.guarantyAmount * log.rate);
+        borrowCoin.transfer(lender,log.borrowAmount);
+    }
+
+    // 結算
+    function closeLoan(int txnId) public {
+        LoanData memory log =  CreatedLoanLogs[txnId];
+        address to = ApproveLoan[txnId];
+        
+        IERC20 guarantyCoin = IERC20(log.guarantyCoin);
+
+        guarantyCoin.transfer(to,log.guarantyAmount);
     }
 }
 
@@ -119,14 +150,15 @@ contract ERC20 is IERC20{
     mapping(address => uint) public balanceOf;
     mapping(address => mapping(address => uint)) public allowance;
     string public name = "USD Jim";
-    string public symbol = "USDJ";
+    string public symbol;
     uint8 public decimals = 18;
 
-    constructor(){
+    constructor(string memory _symbol){
         balanceOf[msg.sender] = 100000;
+        symbol = _symbol;
     }
 
-    function transfer(address recipient, uint amount) external returns (bool) {
+    function transfer(address recipient, uint amount) public returns (bool) {
         balanceOf[msg.sender] -= amount;
         balanceOf[recipient] += amount;
         emit Transfer(msg.sender, recipient, amount);
@@ -161,5 +193,20 @@ contract ERC20 is IERC20{
         balanceOf[msg.sender] -= amount;
         totalSupply -= amount;
         emit Transfer(msg.sender, address(0), amount);
+    }
+
+    function _mint(address account, uint256 amount) internal virtual {
+        require(account != address(0), "ERC20: mint to the zero address");
+
+        totalSupply += amount;
+        balanceOf[account] += amount;
+        emit Transfer(address(0), account, amount);
+    }
+}
+
+
+contract CustomeToken is ERC20{
+   constructor(string memory symbol) ERC20(symbol) {
+        _mint(msg.sender, 1000);
     }
 }
