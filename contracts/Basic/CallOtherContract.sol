@@ -1,5 +1,5 @@
 // SPDX-License-Identifier:MIT
-pragma solidity 0.8.19;
+pragma solidity 0.8.20;
 
 // 這是常見的方式
 // 也可以用低等call的方式
@@ -22,7 +22,7 @@ contract methodUseInstance{
 
     }
 
-    function instance() public view returns(string memory n){
+    function name() public view returns(string memory n){
         n = "Instance";
     }
 }
@@ -41,7 +41,7 @@ contract CallOtherContract{
 
     // method 2，直接導入實例直接用，但其實也是直接輸入address
     function useInstance(methodUseInstance i) public view returns(string memory){
-       return i.instance();
+       return i.name();
     }
 
 }

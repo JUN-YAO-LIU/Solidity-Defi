@@ -1,13 +1,21 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
+// 呼叫不存在的function
+// 傳送msg.value 但沒有receive
+// 傳送msg.value 但有msg.data
+// remix 使用calldata就會傳送msg.data
+// 補充 calldata主要是傳遞外部的資料
+
 contract Fallback {
     event Log(string func, uint gas);
+    bytes public data;
 
     // Fallback function must be declared as external.
     fallback() external payable {
         // send / transfer (forwards 2300 gas to this fallback function)
         // call (forwards all of the gas)
+        data = msg.data;
         emit Log("fallback", gasleft());
     }
 
