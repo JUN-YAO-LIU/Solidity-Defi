@@ -39,16 +39,22 @@ contract ReEntrancyGuard {
     }
 }
 
-contract EtherStore {
+contract EtherStore is ReEntrancyGuard{
     mapping(address => uint) public balances;
+
+
+    constructor() payable {}
 
     function deposit() public payable {
         balances[msg.sender] += msg.value;
     }
 
-    function withdraw() public {
+    function withdraw() public noReentrant {
         uint bal = balances[msg.sender];
         require(bal > 0);
+
+        // 會失敗
+        // balances[msg.sender] = 0;
 
         (bool sent, ) = msg.sender.call{value: bal}("");
         require(sent, "Failed to send Ether");
@@ -65,7 +71,7 @@ contract EtherStore {
 contract Attack {
     EtherStore public etherStore;
 
-    constructor(address _etherStoreAddress) {
+    constructor(address _etherStoreAddress) payable {
         etherStore = EtherStore(_etherStoreAddress);
     }
 
@@ -76,8 +82,14 @@ contract Attack {
         }
     }
 
+    // receive() external payable {
+    //     if (address(etherStore).balance >= 1 ether) {
+    //         etherStore.withdraw();
+    //     }
+    // }
+
     function attack() external payable {
-        require(msg.value >= 1 ether);
+        // require(msg.value >= 1 ether);
         etherStore.deposit{value: 1 ether}();
         etherStore.withdraw();
     }

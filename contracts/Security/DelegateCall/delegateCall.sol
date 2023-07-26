@@ -27,4 +27,12 @@ contract A {
             abi.encodeWithSignature("setVars(uint256)", _num)
         );
     }
+
+
+     function callVars(address _contract, uint _num) public payable {
+        // A's storage is set, B is not modified.
+        _contract.call(
+            abi.encodeWithSignature("setVars(uint256)", _num)
+        );
+    }
 }

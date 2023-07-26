@@ -81,11 +81,8 @@ contract Loan{
        txnNums++;
 
 
-       // 轉入數量到這個合約，先鎖住
-       // guarantyCoin.approve(address(this),_guarantyAmount);
+       // 需要執行這個token的approve，需要用web3.js 直接互叫那個合約才可以同意token進行轉移。
        guarantyCoin.transferFrom(msg.sender,address(this),_guarantyAmount);
-
-       // event
     }
 
     function getLoanLog(int txnId) view public returns(address sender,LoanData memory data){
